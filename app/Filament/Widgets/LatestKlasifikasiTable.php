@@ -9,7 +9,7 @@ use Filament\Widgets\TableWidget;
 
 class LatestKlasifikasiTable extends TableWidget
 {
-    protected static ?string $heading = 'Hasil Klasifikasi Terbaru';
+    protected static ?string $heading = 'Hasil Klasifikasi Siswa Terbaru';
 
     protected static ?string $pollingInterval = '10s';
 
@@ -35,27 +35,34 @@ class LatestKlasifikasiTable extends TableWidget
                 TextColumn::make('siswa.nis')
                     ->label('NIS')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->copyable()
+                    ->placeholder('-'),
 
                 TextColumn::make('siswa.nama')
                     ->label('Nama Siswa')
                     ->searchable()
                     ->sortable()
-                    ->weight('bold'),
+                    ->weight('bold')
+                    ->placeholder('-'),
 
                 TextColumn::make('siswa.kelas.nama_kelas')
                     ->label('Kelas')
                     ->searchable()
                     ->sortable()
+                    ->badge()
+                    ->color('gray')
                     ->placeholder('-'),
 
                 TextColumn::make('jumlah_pelanggaran')
-                    ->label('Jumlah Pelanggaran')
-                    ->sortable(),
+                    ->label('Pelanggaran')
+                    ->sortable()
+                    ->alignCenter(),
 
                 TextColumn::make('total_poin')
                     ->label('Total Poin')
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(),
 
                 TextColumn::make('hasil_ig_naive_bayes')
                     ->label('Hasil NB + IG')
@@ -70,14 +77,16 @@ class LatestKlasifikasiTable extends TableWidget
 
                 TextColumn::make('probabilitas_ig_naive_bayes')
                     ->label('Probabilitas')
-                    ->formatStateUsing(fn ($state): string => $state !== null ? number_format((float) $state, 4) : '-')
-                    ->sortable(),
+                    ->formatStateUsing(fn ($state): string => $state !== null ? number_format((float) $state * 100, 2) . '%' : '-')
+                    ->sortable()
+                    ->alignCenter(),
 
                 TextColumn::make('updated_at')
                     ->label('Diperbarui')
                     ->dateTime('d M Y H:i')
                     ->sortable(),
             ])
+            ->striped()
             ->defaultPaginationPageOption(5);
     }
 }

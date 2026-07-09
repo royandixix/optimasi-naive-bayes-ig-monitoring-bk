@@ -13,6 +13,8 @@ class OsisDashboardStats extends StatsOverviewWidget
 {
     protected ?string $pollingInterval = '10s';
 
+    protected int|string|array $columnSpan = 'full';
+
     public static function canView(): bool
     {
         return auth()->user()?->isOsis() ?? false;
@@ -28,28 +30,43 @@ class OsisDashboardStats extends StatsOverviewWidget
             ->whereDate('tanggal', Carbon::today())
             ->count('id');
 
+        $pelanggaranBulanIni = Pelanggaran::query()
+            ->whereMonth('tanggal', Carbon::now()->month)
+            ->whereYear('tanggal', Carbon::now()->year)
+            ->count('id');
+
         $jenisPelanggaran = JenisPelanggaran::query()->count('id');
 
         return [
             Stat::make('Total Siswa', number_format($totalSiswa))
-                ->description('Data siswa yang dapat dilihat OSIS')
+                ->description('Data siswa yang dapat dilihat oleh OSIS')
                 ->icon('heroicon-o-user-group')
+                ->chart([2, 3, 4, 6, 8, 10, $totalSiswa])
                 ->color('primary'),
 
             Stat::make('Total Pelanggaran', number_format($totalPelanggaran))
-                ->description('Jumlah pelanggaran yang tercatat')
+                ->description('Jumlah pelanggaran yang sudah tercatat')
                 ->icon('heroicon-o-exclamation-triangle')
+                ->chart([1, 2, 3, 5, 8, 10, $totalPelanggaran])
                 ->color('warning'),
 
             Stat::make('Pelanggaran Hari Ini', number_format($pelanggaranHariIni))
                 ->description('Data pelanggaran yang dicatat hari ini')
                 ->icon('heroicon-o-calendar-days')
+                ->chart([0, 1, 1, 2, 2, 3, $pelanggaranHariIni])
                 ->color('danger'),
 
-            Stat::make('Jenis Pelanggaran', number_format($jenisPelanggaran))
-                ->description('Referensi jenis pelanggaran siswa')
-                ->icon('heroicon-o-clipboard-document-list')
+            Stat::make('Pelanggaran Bulan Ini', number_format($pelanggaranBulanIni))
+                ->description('Rekap pelanggaran bulan berjalan')
+                ->icon('heroicon-o-chart-bar')
+                ->chart([1, 3, 4, 6, 8, 9, $pelanggaranBulanIni])
                 ->color('info'),
+
+            Stat::make('Jenis Pelanggaran', number_format($jenisPelanggaran))
+                ->description('Referensi jenis pelanggaran yang tersedia')
+                ->icon('heroicon-o-clipboard-document-list')
+                ->chart([1, 2, 3, 4, 5, 6, $jenisPelanggaran])
+                ->color('gray'),
         ];
     }
 }

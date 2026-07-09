@@ -7,9 +7,11 @@ use Filament\Widgets\ChartWidget;
 
 class EvaluasiModelChart extends ChartWidget
 {
-    protected ?string $heading = 'Evaluasi Performa Model';
+    protected ?string $heading = 'Evaluasi Performa Model Klasifikasi';
 
     protected ?string $pollingInterval = '10s';
+
+    protected int|string|array $columnSpan = 1;
 
     public static function canView(): bool
     {
@@ -41,6 +43,8 @@ class EvaluasiModelChart extends ChartWidget
                         (float) ($naiveBayes?->recall ?? 0),
                         (float) ($naiveBayes?->f1_score ?? 0),
                     ],
+                    'borderWidth' => 2,
+                    'borderRadius' => 8,
                 ],
                 [
                     'label' => 'Naive Bayes + Information Gain',
@@ -50,6 +54,8 @@ class EvaluasiModelChart extends ChartWidget
                         (float) ($optimized?->recall ?? 0),
                         (float) ($optimized?->f1_score ?? 0),
                     ],
+                    'borderWidth' => 2,
+                    'borderRadius' => 8,
                 ],
             ],
             'labels' => [
@@ -57,6 +63,28 @@ class EvaluasiModelChart extends ChartWidget
                 'Precision',
                 'Recall',
                 'F1 Score',
+            ],
+        ];
+    }
+
+    protected function getOptions(): array
+    {
+        return [
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'plugins' => [
+                'legend' => [
+                    'position' => 'bottom',
+                ],
+                'tooltip' => [
+                    'enabled' => true,
+                ],
+            ],
+            'scales' => [
+                'y' => [
+                    'beginAtZero' => true,
+                    'max' => 1,
+                ],
             ],
         ];
     }

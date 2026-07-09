@@ -7,9 +7,11 @@ use Filament\Widgets\ChartWidget;
 
 class KlasifikasiHasilChart extends ChartWidget
 {
-    protected ?string $heading = 'Distribusi Hasil Klasifikasi';
+    protected ?string $heading = 'Distribusi Hasil Klasifikasi Perilaku Siswa';
 
     protected ?string $pollingInterval = '10s';
+
+    protected int|string|array $columnSpan = 1;
 
     public ?string $filter = 'ig';
 
@@ -53,9 +55,28 @@ class KlasifikasiHasilChart extends ChartWidget
                 [
                     'label' => 'Jumlah Siswa',
                     'data' => $data,
+                    'borderWidth' => 2,
+                    'hoverOffset' => 8,
                 ],
             ],
             'labels' => $labels,
+        ];
+    }
+
+    protected function getOptions(): array
+    {
+        return [
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'cutout' => '62%',
+            'plugins' => [
+                'legend' => [
+                    'position' => 'bottom',
+                ],
+                'tooltip' => [
+                    'enabled' => true,
+                ],
+            ],
         ];
     }
 

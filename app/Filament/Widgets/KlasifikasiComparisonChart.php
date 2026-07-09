@@ -7,9 +7,11 @@ use Filament\Widgets\ChartWidget;
 
 class KlasifikasiComparisonChart extends ChartWidget
 {
-    protected ?string $heading = 'Perbandingan Naive Bayes dan Naive Bayes + Information Gain';
+    protected ?string $heading = 'Perbandingan Hasil Naive Bayes dan NB + Information Gain';
 
     protected ?string $pollingInterval = '10s';
+
+    protected int|string|array $columnSpan = 1;
 
     public static function canView(): bool
     {
@@ -40,13 +42,41 @@ class KlasifikasiComparisonChart extends ChartWidget
                 [
                     'label' => 'Naive Bayes',
                     'data' => $naiveBayes,
+                    'borderWidth' => 2,
+                    'borderRadius' => 8,
                 ],
                 [
                     'label' => 'Naive Bayes + Information Gain',
                     'data' => $optimized,
+                    'borderWidth' => 2,
+                    'borderRadius' => 8,
                 ],
             ],
             'labels' => $labels,
+        ];
+    }
+
+    protected function getOptions(): array
+    {
+        return [
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'plugins' => [
+                'legend' => [
+                    'position' => 'bottom',
+                ],
+                'tooltip' => [
+                    'enabled' => true,
+                ],
+            ],
+            'scales' => [
+                'y' => [
+                    'beginAtZero' => true,
+                    'ticks' => [
+                        'precision' => 0,
+                    ],
+                ],
+            ],
         ];
     }
 

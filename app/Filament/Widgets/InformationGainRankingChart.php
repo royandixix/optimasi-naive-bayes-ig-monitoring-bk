@@ -7,9 +7,11 @@ use Filament\Widgets\ChartWidget;
 
 class InformationGainRankingChart extends ChartWidget
 {
-    protected ?string $heading = 'Ranking Information Gain';
+    protected ?string $heading = 'Ranking Fitur Berdasarkan Information Gain';
 
     protected ?string $pollingInterval = '10s';
+
+    protected int|string|array $columnSpan = 1;
 
     public static function canView(): bool
     {
@@ -31,6 +33,8 @@ class InformationGainRankingChart extends ChartWidget
                 [
                     'label' => 'Nilai Gain',
                     'data' => $results->pluck('gain')->map(fn ($value): float => (float) $value)->toArray(),
+                    'borderWidth' => 2,
+                    'borderRadius' => 8,
                 ],
             ],
             'labels' => $results->pluck('fitur')->toArray(),
@@ -41,6 +45,21 @@ class InformationGainRankingChart extends ChartWidget
     {
         return [
             'indexAxis' => 'y',
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'plugins' => [
+                'legend' => [
+                    'position' => 'bottom',
+                ],
+                'tooltip' => [
+                    'enabled' => true,
+                ],
+            ],
+            'scales' => [
+                'x' => [
+                    'beginAtZero' => true,
+                ],
+            ],
         ];
     }
 
