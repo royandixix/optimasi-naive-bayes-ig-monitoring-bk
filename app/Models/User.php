@@ -44,7 +44,6 @@ class User extends Authenticatable implements FilamentUser
             'super_admin',
             'admin',
             'kepala_sekolah',
-            'wali_murid',
         ]);
     }
 
