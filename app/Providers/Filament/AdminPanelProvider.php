@@ -8,6 +8,7 @@ use App\Filament\Widgets\KlasifikasiComparisonChart;
 use App\Filament\Widgets\KlasifikasiHasilChart;
 use App\Filament\Widgets\KlasifikasiStatsOverview;
 use App\Filament\Widgets\LatestKlasifikasiTable;
+use App\Filament\Widgets\OsisDashboardStats;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -44,6 +45,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->widgets([
                 AccountWidget::class,
+                OsisDashboardStats::class,
                 KlasifikasiStatsOverview::class,
                 KlasifikasiHasilChart::class,
                 KlasifikasiComparisonChart::class,
