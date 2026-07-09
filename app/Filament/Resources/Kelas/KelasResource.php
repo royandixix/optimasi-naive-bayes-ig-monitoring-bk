@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class KelasResource extends Resource
@@ -21,17 +22,15 @@ class KelasResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 
-    protected static ?string $recordTitleAttribute = 'nama_kelas';
-
-    protected static ?string $modelLabel = 'Kelas';
-
-    protected static ?string $pluralModelLabel = 'Data Kelas';
+    protected static string|UnitEnum|null $navigationGroup = 'Master Data';
 
     protected static ?string $navigationLabel = 'Kelas';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?string $modelLabel = 'Kelas';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Master Data';
+    protected static ?string $pluralModelLabel = 'Kelas';
+
+    protected static ?int $navigationSort = 10;
 
     public static function form(Schema $schema): Schema
     {
@@ -43,9 +42,34 @@ class KelasResource extends Resource
         return KelasTable::configure($table);
     }
 
-    public static function getRelations(): array
+    public static function shouldRegisterNavigation(): bool
     {
-        return [];
+        return auth()->user()?->isGuruBk() ?? false;
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->isGuruBk() ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->isGuruBk() ?? false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return auth()->user()?->isGuruBk() ?? false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()?->isGuruBk() ?? false;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return auth()->user()?->isGuruBk() ?? false;
     }
 
     public static function getPages(): array

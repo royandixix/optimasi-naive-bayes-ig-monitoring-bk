@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\JenisPelanggarans\Schemas;
 
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class JenisPelanggaranForm
@@ -12,9 +13,10 @@ class JenisPelanggaranForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
                 Section::make('Informasi Jenis Pelanggaran')
-                    ->description('Masukkan informasi mengenai jenis pelanggaran.')
+                    ->description('Masukkan informasi mengenai jenis pelanggaran siswa.')
                     ->columns(2)
                     ->schema([
                         TextInput::make('kode_jenis')
@@ -27,25 +29,46 @@ class JenisPelanggaranForm
 
                         TextInput::make('nama_jenis')
                             ->label('Nama Jenis Pelanggaran')
-                            ->placeholder('Contoh: Terlambat Masuk Sekolah')
+                            ->placeholder('Contoh: Terlambat masuk sekolah')
                             ->required()
-                            ->maxLength(100),
+                            ->maxLength(255)
+                            ->autocomplete(false),
+
+                        Select::make('aspek_pelanggaran')
+                            ->label('Aspek Pelanggaran')
+                            ->options([
+                                'Kelakuan' => 'Kelakuan',
+                                'Kerajinan' => 'Kerajinan',
+                                'Kerapian' => 'Kerapian',
+                                'Kehadiran' => 'Kehadiran',
+                                'Lainnya' => 'Lainnya',
+                            ])
+                            ->default('Kelakuan')
+                            ->required()
+                            ->native(false),
+
+                        Select::make('tingkat_pelanggaran')
+                            ->label('Tingkat Pelanggaran')
+                            ->options([
+                                'Ringan' => 'Ringan',
+                                'Sedang' => 'Sedang',
+                                'Berat' => 'Berat',
+                            ])
+                            ->default('Ringan')
+                            ->required()
+                            ->native(false),
 
                         TextInput::make('poin')
                             ->label('Poin Pelanggaran')
                             ->numeric()
-                            ->minValue(1)
-                            ->required()
-                            ->helperText('Semakin besar poin, semakin berat tingkat pelanggaran.'),
-                    ]),
+                            ->minValue(0)
+                            ->default(0)
+                            ->required(),
 
-                Section::make('Keterangan')
-                    ->description('Tambahkan informasi pendukung jika diperlukan.')
-                    ->schema([
                         Textarea::make('keterangan')
                             ->label('Keterangan')
+                            ->placeholder('Masukkan keterangan tambahan jika diperlukan')
                             ->rows(4)
-                            ->placeholder('Masukkan keterangan atau penjelasan tambahan...')
                             ->columnSpanFull(),
                     ]),
             ]);

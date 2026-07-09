@@ -13,12 +13,16 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use UnitEnum;
 
 class JenisPelanggaranResource extends Resource
 {
     protected static ?string $model = JenisPelanggaran::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldExclamation;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedExclamationTriangle;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Master Data';
 
     protected static ?string $navigationLabel = 'Jenis Pelanggaran';
 
@@ -26,24 +30,7 @@ class JenisPelanggaranResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Jenis Pelanggaran';
 
-    protected static ?string $recordTitleAttribute = 'nama_jenis';
-
-    protected static ?int $navigationSort = 2;
-
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Master Data';
-    }
-
-    public static function getNavigationBadge(): ?string
-    {
-        return (string) static::getModel()::count();
-    }
-
-    public static function getNavigationBadgeColor(): string
-    {
-        return 'primary';
-    }
+    protected static ?int $navigationSort = 20;
 
     public static function form(Schema $schema): Schema
     {
@@ -55,9 +42,34 @@ class JenisPelanggaranResource extends Resource
         return JenisPelanggaransTable::configure($table);
     }
 
-    public static function getRelations(): array
+    public static function shouldRegisterNavigation(): bool
     {
-        return [];
+        return auth()->user()?->isGuruBk() ?? false;
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->isGuruBk() ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->isGuruBk() ?? false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return auth()->user()?->isGuruBk() ?? false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()?->isGuruBk() ?? false;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return auth()->user()?->isGuruBk() ?? false;
     }
 
     public static function getPages(): array
