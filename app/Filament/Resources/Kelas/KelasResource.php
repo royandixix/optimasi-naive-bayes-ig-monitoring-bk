@@ -20,17 +20,25 @@ class KelasResource extends Resource
 {
     protected static ?string $model = Kelas::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
+    protected static string|BackedEnum|null $navigationIcon =
+        Heroicon::OutlinedAcademicCap;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Master Data';
+    protected static string|UnitEnum|null $navigationGroup =
+        'Master Data';
 
-    protected static ?string $navigationLabel = 'Kelas';
+    protected static ?string $navigationLabel =
+        'Kelas';
 
-    protected static ?string $modelLabel = 'Kelas';
+    protected static ?string $modelLabel =
+        'Kelas';
 
-    protected static ?string $pluralModelLabel = 'Kelas';
+    protected static ?string $pluralModelLabel =
+        'Data Kelas';
 
     protected static ?int $navigationSort = 10;
+
+    protected static ?string $recordTitleAttribute =
+        'nama_kelas';
 
     public static function form(Schema $schema): Schema
     {
@@ -42,31 +50,62 @@ class KelasResource extends Resource
         return KelasTable::configure($table);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Hak akses sidebar
+    |--------------------------------------------------------------------------
+    | Menu Kelas hanya muncul untuk Guru BK.
+    */
     public static function shouldRegisterNavigation(): bool
     {
         return auth()->user()?->isGuruBk() ?? false;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Hak akses halaman daftar
+    |--------------------------------------------------------------------------
+    */
     public static function canViewAny(): bool
     {
         return auth()->user()?->isGuruBk() ?? false;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Hak akses menambah kelas
+    |--------------------------------------------------------------------------
+    */
     public static function canCreate(): bool
     {
         return auth()->user()?->isGuruBk() ?? false;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Hak akses mengedit kelas
+    |--------------------------------------------------------------------------
+    */
     public static function canEdit(Model $record): bool
     {
         return auth()->user()?->isGuruBk() ?? false;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Hak akses menghapus satu kelas
+    |--------------------------------------------------------------------------
+    */
     public static function canDelete(Model $record): bool
     {
         return auth()->user()?->isGuruBk() ?? false;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Hak akses menghapus banyak kelas
+    |--------------------------------------------------------------------------
+    */
     public static function canDeleteAny(): bool
     {
         return auth()->user()?->isGuruBk() ?? false;

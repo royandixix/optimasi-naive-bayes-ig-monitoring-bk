@@ -2,19 +2,20 @@
 
 namespace App\Filament\Resources\Klasifikasis\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class KlasifikasisTable
 {
-    public static function configure(Table $table): Table
-    {
+    public static function configure(
+        Table $table
+    ): Table {
         return $table
-            ->defaultSort('updated_at', 'desc')
+            ->defaultSort(
+                'updated_at',
+                'desc'
+            )
             ->striped()
             ->columns([
                 TextColumn::make('siswa.nis')
@@ -29,13 +30,30 @@ class KlasifikasisTable
                     ->sortable()
                     ->weight('bold'),
 
-                TextColumn::make('siswa.kelas.nama_kelas')
+                TextColumn::make(
+                    'siswa.kelas.nama_kelas'
+                )
                     ->label('Kelas')
                     ->searchable()
                     ->sortable()
                     ->placeholder('-'),
 
-                TextColumn::make('jumlah_pelanggaran')
+                TextColumn::make(
+                    'tahun_ajaran'
+                )
+                    ->label('Tahun Ajaran')
+                    ->sortable()
+                    ->placeholder('-'),
+
+                TextColumn::make('semester')
+                    ->label('Semester')
+                    ->badge()
+                    ->sortable()
+                    ->placeholder('-'),
+
+                TextColumn::make(
+                    'jumlah_pelanggaran'
+                )
                     ->label('Jumlah')
                     ->numeric()
                     ->alignCenter()
@@ -47,92 +65,193 @@ class KlasifikasisTable
                     ->alignCenter()
                     ->sortable(),
 
-                TextColumn::make('label_aktual')
+                TextColumn::make(
+                    'label_aktual'
+                )
                     ->label('Aktual')
                     ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'Baik' => 'success',
-                        'Perlu Pembinaan' => 'warning',
-                        'Bermasalah' => 'danger',
-                        default => 'gray',
-                    }),
+                    ->color(
+                        fn (
+                            ?string $state
+                        ): string => match ($state) {
+                            'Baik' =>
+                                'success',
 
-                TextColumn::make('hasil_naive_bayes')
+                            'Perlu Pembinaan' =>
+                                'warning',
+
+                            'Bermasalah' =>
+                                'danger',
+
+                            default =>
+                                'gray',
+                        }
+                    )
+                    ->placeholder(
+                        'Belum dilabeli'
+                    ),
+
+                TextColumn::make(
+                    'hasil_naive_bayes'
+                )
                     ->label('Naive Bayes')
                     ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'Baik' => 'success',
-                        'Perlu Pembinaan' => 'warning',
-                        'Bermasalah' => 'danger',
-                        default => 'gray',
-                    }),
+                    ->color(
+                        fn (
+                            ?string $state
+                        ): string => match ($state) {
+                            'Baik' =>
+                                'success',
 
-                TextColumn::make('hasil_ig_naive_bayes')
+                            'Perlu Pembinaan' =>
+                                'warning',
+
+                            'Bermasalah' =>
+                                'danger',
+
+                            default =>
+                                'gray',
+                        }
+                    ),
+
+                TextColumn::make(
+                    'probabilitas_naive_bayes'
+                )
+                    ->label('Prob. NB')
+                    ->formatStateUsing(
+                        fn ($state): string =>
+                            $state !== null
+                            ? number_format(
+                                (float) $state * 100,
+                                2
+                            ).'%'
+                            : '-'
+                    )
+                    ->alignCenter()
+                    ->toggleable(
+                        isToggledHiddenByDefault:
+                            true
+                    ),
+
+                TextColumn::make(
+                    'hasil_ig_naive_bayes'
+                )
                     ->label('NB + IG')
                     ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'Baik' => 'success',
-                        'Perlu Pembinaan' => 'warning',
-                        'Bermasalah' => 'danger',
-                        default => 'gray',
-                    }),
+                    ->color(
+                        fn (
+                            ?string $state
+                        ): string => match ($state) {
+                            'Baik' =>
+                                'success',
 
-                TextColumn::make('probabilitas')
-                    ->label('Probabilitas')
-                    ->numeric(decimalPlaces: 6)
-                    ->sortable(),
+                            'Perlu Pembinaan' =>
+                                'warning',
+
+                            'Bermasalah' =>
+                                'danger',
+
+                            default =>
+                                'gray',
+                        }
+                    ),
+
+                TextColumn::make(
+                    'probabilitas_ig_naive_bayes'
+                )
+                    ->label('Prob. NB + IG')
+                    ->formatStateUsing(
+                        fn ($state): string =>
+                            $state !== null
+                            ? number_format(
+                                (float) $state * 100,
+                                2
+                            ).'%'
+                            : '-'
+                    )
+                    ->alignCenter(),
 
                 TextColumn::make('metode')
                     ->label('Metode')
-                    ->searchable()
-                    ->toggleable(),
+                    ->toggleable(
+                        isToggledHiddenByDefault:
+                            true
+                    ),
 
-                TextColumn::make('updated_at')
+                TextColumn::make(
+                    'updated_at'
+                )
                     ->label('Diperbarui')
-                    ->dateTime('d M Y H:i')
+                    ->dateTime(
+                        'd M Y H:i'
+                    )
                     ->sortable(),
-
-                TextColumn::make('created_at')
-                    ->label('Dibuat')
-                    ->dateTime('d M Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('hasil_klasifikasi')
-                    ->label('Hasil Klasifikasi')
+                SelectFilter::make(
+                    'tahun_ajaran'
+                )
+                    ->label('Tahun Ajaran')
+                    ->options(
+                        fn (): array =>
+                            \App\Models\Klasifikasi::query()
+                                ->whereNotNull(
+                                    'tahun_ajaran'
+                                )
+                                ->distinct()
+                                ->orderByDesc(
+                                    'tahun_ajaran'
+                                )
+                                ->pluck(
+                                    'tahun_ajaran',
+                                    'tahun_ajaran'
+                                )
+                                ->toArray()
+                    ),
+
+                SelectFilter::make(
+                    'semester'
+                )
                     ->options([
-                        'Baik' => 'Baik',
-                        'Perlu Pembinaan' => 'Perlu Pembinaan',
-                        'Bermasalah' => 'Bermasalah',
+                        'Ganjil' => 'Ganjil',
+                        'Genap' => 'Genap',
                     ]),
 
-                SelectFilter::make('label_aktual')
+                SelectFilter::make(
+                    'hasil_ig_naive_bayes'
+                )
+                    ->label('Hasil NB + IG')
+                    ->options([
+                        'Baik' =>
+                            'Baik',
+
+                        'Perlu Pembinaan' =>
+                            'Perlu Pembinaan',
+
+                        'Bermasalah' =>
+                            'Bermasalah',
+                    ]),
+
+                SelectFilter::make(
+                    'label_aktual'
+                )
                     ->label('Label Aktual')
                     ->options([
-                        'Baik' => 'Baik',
-                        'Perlu Pembinaan' => 'Perlu Pembinaan',
-                        'Bermasalah' => 'Bermasalah',
-                    ]),
+                        'Baik' =>
+                            'Baik',
 
-                SelectFilter::make('siswa_id')
-                    ->label('Siswa')
-                    ->relationship('siswa', 'nama')
-                    ->searchable()
-                    ->preload(),
+                        'Perlu Pembinaan' =>
+                            'Perlu Pembinaan',
+
+                        'Bermasalah' =>
+                            'Bermasalah',
+                    ]),
             ])
-            ->recordActions([
-                EditAction::make()
-                    ->label('Detail'),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->label('Hapus Terpilih')
-                        ->requiresConfirmation(),
-                ]),
-            ])
-            ->emptyStateHeading('Belum ada hasil klasifikasi')
-            ->emptyStateDescription('Klik tombol proses Python Naive Bayes + Information Gain untuk menghasilkan klasifikasi otomatis.');
+            ->emptyStateHeading(
+                'Belum ada hasil klasifikasi'
+            )
+            ->emptyStateDescription(
+                'Isi Label Perilaku, lalu klik Proses Naive Bayes + Information Gain.'
+            );
     }
 }

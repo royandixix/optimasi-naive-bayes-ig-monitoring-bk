@@ -7,57 +7,122 @@ use Filament\Widgets\ChartWidget;
 
 class EvaluasiModelChart extends ChartWidget
 {
-    protected ?string $heading = 'Evaluasi Performa Model Klasifikasi';
+    protected ?string $heading =
+        'Evaluasi Performa Model Klasifikasi';
 
-    protected ?string $pollingInterval = '10s';
+    protected ?string $pollingInterval =
+        '10s';
 
-    protected int|string|array $columnSpan = 1;
+    protected int|string|array $columnSpan =
+        1;
 
     public static function canView(): bool
     {
-        return auth()->user()?->hasAnyRole([
-            'super_admin',
-            'kepala_sekolah',
-        ]) ?? false;
+        return auth()
+            ->user()
+            ?->hasAnyRole([
+                'super_admin',
+                'kepala_sekolah',
+            ]) ?? false;
     }
 
     protected function getData(): array
     {
-        $naiveBayes = EvaluasiModel::query()
-            ->where('metode', 'Naive Bayes')
+        $optimized = EvaluasiModel::query()
+            ->where(
+                'metode',
+                'Naive Bayes + Information Gain'
+            )
             ->latest()
             ->first();
 
-        $optimized = EvaluasiModel::query()
-            ->where('metode', 'Naive Bayes + Information Gain')
-            ->latest()
-            ->first();
+        $naiveBayesQuery =
+            EvaluasiModel::query()
+                ->where(
+                    'metode',
+                    'Naive Bayes'
+                );
+
+        if ($optimized?->tahun_ajaran) {
+            $naiveBayesQuery
+                ->where(
+                    'tahun_ajaran',
+                    $optimized->tahun_ajaran
+                )
+                ->where(
+                    'semester',
+                    $optimized->semester
+                );
+        }
+
+        $naiveBayes =
+            $naiveBayesQuery
+                ->latest()
+                ->first();
 
         return [
             'datasets' => [
                 [
-                    'label' => 'Naive Bayes',
+                    'label' =>
+                        'Naive Bayes',
+
                     'data' => [
-                        (float) ($naiveBayes?->akurasi ?? 0),
-                        (float) ($naiveBayes?->precision ?? 0),
-                        (float) ($naiveBayes?->recall ?? 0),
-                        (float) ($naiveBayes?->f1_score ?? 0),
+                        (float) (
+                            $naiveBayes
+                                ?->akurasi ?? 0
+                        ),
+
+                        (float) (
+                            $naiveBayes
+                                ?->precision ?? 0
+                        ),
+
+                        (float) (
+                            $naiveBayes
+                                ?->recall ?? 0
+                        ),
+
+                        (float) (
+                            $naiveBayes
+                                ?->f1_score ?? 0
+                        ),
                     ],
+
                     'borderWidth' => 2,
                     'borderRadius' => 8,
                 ],
+
                 [
-                    'label' => 'Naive Bayes + Information Gain',
+                    'label' =>
+                        'Naive Bayes + Information Gain',
+
                     'data' => [
-                        (float) ($optimized?->akurasi ?? 0),
-                        (float) ($optimized?->precision ?? 0),
-                        (float) ($optimized?->recall ?? 0),
-                        (float) ($optimized?->f1_score ?? 0),
+                        (float) (
+                            $optimized
+                                ?->akurasi ?? 0
+                        ),
+
+                        (float) (
+                            $optimized
+                                ?->precision ?? 0
+                        ),
+
+                        (float) (
+                            $optimized
+                                ?->recall ?? 0
+                        ),
+
+                        (float) (
+                            $optimized
+                                ?->f1_score ?? 0
+                        ),
                     ],
+
                     'borderWidth' => 2,
                     'borderRadius' => 8,
                 ],
             ],
+
             'labels' => [
                 'Akurasi',
                 'Precision',
@@ -71,19 +136,24 @@ class EvaluasiModelChart extends ChartWidget
     {
         return [
             'responsive' => true,
-            'maintainAspectRatio' => false,
+
+            'maintainAspectRatio' =>
+                false,
+
             'plugins' => [
                 'legend' => [
                     'position' => 'bottom',
                 ],
+
                 'tooltip' => [
                     'enabled' => true,
                 ],
             ],
+
             'scales' => [
                 'y' => [
                     'beginAtZero' => true,
-                    'max' => 1,
+                    'max' => 100,
                 ],
             ],
         ];

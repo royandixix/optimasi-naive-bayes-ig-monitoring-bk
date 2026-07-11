@@ -2,35 +2,67 @@
 
 namespace App\Filament\Resources\EvaluasiModels\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class EvaluasiModelsTable
 {
-    public static function configure(Table $table): Table
-    {
+    public static function configure(
+        Table $table
+    ): Table {
         return $table
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort(
+                'created_at',
+                'desc'
+            )
             ->striped()
             ->columns([
                 TextColumn::make('metode')
                     ->label('Metode')
                     ->badge()
-                    ->color('primary')
+                    ->color(
+                        fn (
+                            ?string $state
+                        ): string => match ($state) {
+                            'Naive Bayes + Information Gain' =>
+                                'success',
+
+                            'Naive Bayes' =>
+                                'info',
+
+                            default =>
+                                'gray',
+                        }
+                    )
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('jumlah_data_training')
-                    ->label('Data Training')
+                TextColumn::make(
+                    'tahun_ajaran'
+                )
+                    ->label('Tahun Ajaran')
+                    ->sortable()
+                    ->placeholder('-'),
+
+                TextColumn::make('semester')
+                    ->label('Semester')
+                    ->badge()
+                    ->sortable()
+                    ->placeholder('-'),
+
+                TextColumn::make(
+                    'jumlah_data_training'
+                )
+                    ->label('Training')
                     ->numeric()
                     ->alignCenter()
                     ->sortable(),
 
-                TextColumn::make('jumlah_data_testing')
-                    ->label('Data Testing')
+                TextColumn::make(
+                    'jumlah_data_testing'
+                )
+                    ->label('Testing')
                     ->numeric()
                     ->alignCenter()
                     ->sortable(),
@@ -63,30 +95,86 @@ class EvaluasiModelsTable
                     ->color('danger')
                     ->sortable(),
 
-                TextColumn::make('created_at')
-                    ->label('Dibuat')
-                    ->since()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make(
+                    'training_ratio'
+                )
+                    ->label('Rasio Training')
+                    ->formatStateUsing(
+                        fn ($state): string =>
+                            $state !== null
+                            ? number_format(
+                                (float) $state * 100,
+                                0
+                            ).'%'
+                            : '-'
+                    )
+                    ->toggleable(
+                        isToggledHiddenByDefault:
+                            true
+                    ),
 
-                TextColumn::make('updated_at')
-                    ->label('Diubah')
-                    ->since()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make(
+                    'random_seed'
+                )
+                    ->label('Seed')
+                    ->toggleable(
+                        isToggledHiddenByDefault:
+                            true
+                    ),
+
+                TextColumn::make(
+                    'created_at'
+                )
+                    ->label('Diproses')
+                    ->dateTime(
+                        'd M Y H:i'
+                    )
+                    ->sortable(),
             ])
             ->filters([
+                SelectFilter::make('metode')
+                    ->options([
+                        'Naive Bayes' =>
+                            'Naive Bayes',
+
+                        'Naive Bayes + Information Gain' =>
+                            'Naive Bayes + Information Gain',
+                    ]),
+
+                SelectFilter::make(
+                    'tahun_ajaran'
+                )
+                    ->label('Tahun Ajaran')
+                    ->options(
+                        fn (): array =>
+                            \App\Models\EvaluasiModel::query()
+                                ->whereNotNull(
+                                    'tahun_ajaran'
+                                )
+                                ->distinct()
+                                ->orderByDesc(
+                                    'tahun_ajaran'
+                                )
+                                ->pluck(
+                                    'tahun_ajaran',
+                                    'tahun_ajaran'
+                                )
+                                ->toArray()
+                    ),
+
+                SelectFilter::make(
+                    'semester'
+                )
+                    ->options([
+                        'Ganjil' => 'Ganjil',
+                        'Genap' => 'Genap',
+                    ]),
             ])
-            ->recordActions([
-                EditAction::make()
-                    ->label('Edit')
-                    ->icon('heroicon-o-pencil-square'),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->label('Hapus Terpilih'),
-                ]),
-            ]);
+            ->emptyStateHeading(
+                'Belum ada hasil evaluasi'
+            )
+            ->emptyStateDescription(
+                'Jalankan proses klasifikasi untuk menghasilkan evaluasi model.'
+            );
     }
 }

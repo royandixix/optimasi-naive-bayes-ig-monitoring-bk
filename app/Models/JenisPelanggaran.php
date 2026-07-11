@@ -3,20 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class JenisPelanggaran extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'kode_jenis',
-        'nama_jenis',
+        'kode_pelanggaran',
+        'nama_pelanggaran',
+        'aspek_pelanggaran',
+        'tingkat_pelanggaran',
         'poin',
-        'keterangan'
+        'keterangan',
     ];
 
-    public function pelanggarans()
+    protected function casts(): array
+    {
+        return [
+            'poin' => 'integer',
+        ];
+    }
+
+    public function pelanggarans(): HasMany
     {
         return $this->hasMany(Pelanggaran::class);
     }

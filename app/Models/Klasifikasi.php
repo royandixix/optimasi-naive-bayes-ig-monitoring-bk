@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Klasifikasi extends Model
 {
@@ -11,6 +12,8 @@ class Klasifikasi extends Model
 
     protected $fillable = [
         'siswa_id',
+        'tahun_ajaran',
+        'semester',
         'jumlah_pelanggaran',
         'total_poin',
         'hasil_klasifikasi',
@@ -40,7 +43,7 @@ class Klasifikasi extends Model
         ];
     }
 
-    public function siswa()
+    public function siswa(): BelongsTo
     {
         return $this->belongsTo(Siswa::class);
     }

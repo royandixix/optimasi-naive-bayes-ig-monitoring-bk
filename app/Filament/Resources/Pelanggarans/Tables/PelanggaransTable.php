@@ -2,153 +2,407 @@
 
 namespace App\Filament\Resources\Pelanggarans\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\Pelanggarans\PelanggaranResource;
+use App\Models\Pelanggaran;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class PelanggaransTable
 {
-    public static function configure(Table $table): Table
-    {
+    public static function configure(
+        Table $table
+    ): Table {
         return $table
-            ->defaultSort('tanggal', 'desc')
+            ->defaultSort(
+                'created_at',
+                'desc'
+            )
             ->striped()
             ->columns([
                 TextColumn::make('siswa.nis')
                     ->label('NIS')
                     ->searchable()
-                    ->sortable()
-                    ->copyable(),
+                    ->sortable(),
 
                 TextColumn::make('siswa.nama')
                     ->label('Nama Siswa')
+                    ->weight('bold')
                     ->searchable()
-                    ->sortable()
-                    ->weight('bold'),
+                    ->sortable(),
 
-                TextColumn::make('siswa.kelas.nama_kelas')
+                TextColumn::make(
+                    'siswa.kelas.nama_kelas'
+                )
                     ->label('Kelas')
-                    ->searchable()
-                    ->sortable()
-                    ->placeholder('-'),
-
-                TextColumn::make('jenisPelanggaran.nama_jenis')
-                    ->label('Jenis Pelanggaran')
-                    ->searchable()
-                    ->sortable()
-                    ->limit(40)
-                    ->tooltip(fn ($record): ?string => $record->jenisPelanggaran?->nama_jenis),
-
-                TextColumn::make('jenisPelanggaran.aspek_pelanggaran')
-                    ->label('Aspek')
                     ->badge()
-                    ->sortable()
                     ->color('info'),
 
-                TextColumn::make('jenisPelanggaran.tingkat_pelanggaran')
-                    ->label('Tingkat')
-                    ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'Berat' => 'danger',
-                        'Sedang' => 'warning',
-                        'Ringan' => 'success',
-                        default => 'gray',
-                    })
-                    ->sortable(),
+                TextColumn::make(
+                    'jenisPelanggaran.nama_jenis'
+                )
+                    ->label(
+                        'Jenis Pelanggaran'
+                    )
+                    ->searchable()
+                    ->wrap(),
 
-                TextColumn::make('jenisPelanggaran.poin')
+                TextColumn::make(
+                    'jenisPelanggaran.poin'
+                )
                     ->label('Poin')
-                    ->numeric()
                     ->badge()
-                    ->alignCenter()
-                    ->color(fn (?int $state): string => match (true) {
-                        ($state ?? 0) > 15 => 'danger',
-                        ($state ?? 0) >= 5 => 'warning',
-                        default => 'success',
-                    })
-                    ->sortable(),
+                    ->color('danger')
+                    ->suffix(' poin'),
 
                 TextColumn::make('tanggal')
-                    ->label('Tanggal')
+                    ->label(
+                        'Tanggal Kejadian'
+                    )
                     ->date('d M Y')
                     ->sortable(),
 
+                TextColumn::make(
+                    'tahun_ajaran'
+                )
+                    ->label(
+                        'Tahun Ajaran'
+                    )
+                    ->badge(),
+
                 TextColumn::make('semester')
                     ->label('Semester')
-                    ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'Ganjil' => 'info',
-                        'Genap' => 'success',
-                        default => 'gray',
-                    })
-                    ->sortable(),
+                    ->badge(),
 
-                TextColumn::make('tahun_ajaran')
-                    ->label('Tahun Ajaran')
-                    ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('keterangan')
-                    ->label('Keterangan')
-                    ->limit(40)
+                TextColumn::make(
+                    'diajukanOleh.name'
+                )
+                    ->label('Diajukan Oleh')
+                    ->placeholder('-')
                     ->toggleable(),
 
-                TextColumn::make('created_at')
-                    ->label('Dibuat')
-                    ->dateTime('d M Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make(
+                    'status_pengajuan'
+                )
+                    ->label('Status')
+                    ->badge()
+                    ->formatStateUsing(
+                        fn (
+                            ?string $state
+                        ): string =>
+                            match ($state) {
+                                Pelanggaran::STATUS_DISETUJUI =>
+                                    'Disetujui',
+                                Pelanggaran::STATUS_DITOLAK =>
+                                    'Ditolak',
+                                default =>
+                                    'Menunggu',
+                            }
+                    )
+                    ->color(
+                        fn (
+                            ?string $state
+                        ): string =>
+                            match ($state) {
+                                Pelanggaran::STATUS_DISETUJUI =>
+                                    'success',
+                                Pelanggaran::STATUS_DITOLAK =>
+                                    'danger',
+                                default =>
+                                    'warning',
+                            }
+                    )
+                    ->icon(
+                        fn (
+                            ?string $state
+                        ): string =>
+                            match ($state) {
+                                Pelanggaran::STATUS_DISETUJUI =>
+                                    'heroicon-o-check-circle',
+                                Pelanggaran::STATUS_DITOLAK =>
+                                    'heroicon-o-x-circle',
+                                default =>
+                                    'heroicon-o-clock',
+                            }
+                    ),
 
-                TextColumn::make('updated_at')
-                    ->label('Diperbarui')
-                    ->dateTime('d M Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make(
+                    'catatan_verifikasi'
+                )
+                    ->label(
+                        'Catatan Guru BK'
+                    )
+                    ->placeholder('-')
+                    ->limit(40)
+                    ->tooltip(
+                        fn (
+                            Pelanggaran $record
+                        ): ?string =>
+                            $record
+                                ->catatan_verifikasi
+                    )
+                    ->wrap(),
+
+                TextColumn::make(
+                    'diprosesOleh.name'
+                )
+                    ->label(
+                        'Diproses Oleh'
+                    )
+                    ->placeholder('-')
+                    ->toggleable(
+                        isToggledHiddenByDefault:
+                            true
+                    ),
+
+                TextColumn::make(
+                    'diproses_pada'
+                )
+                    ->label(
+                        'Diproses Pada'
+                    )
+                    ->dateTime(
+                        'd M Y H:i'
+                    )
+                    ->placeholder('-')
+                    ->toggleable(
+                        isToggledHiddenByDefault:
+                            true
+                    ),
             ])
             ->filters([
-                SelectFilter::make('siswa_id')
-                    ->label('Siswa')
-                    ->relationship('siswa', 'nama')
-                    ->searchable()
-                    ->preload(),
-
-                SelectFilter::make('jenis_pelanggaran_id')
-                    ->label('Jenis Pelanggaran')
-                    ->relationship('jenisPelanggaran', 'nama_jenis')
-                    ->searchable()
-                    ->preload(),
+                SelectFilter::make(
+                    'status_pengajuan'
+                )
+                    ->label(
+                        'Status Pengajuan'
+                    )
+                    ->options([
+                        Pelanggaran::STATUS_MENUNGGU =>
+                            'Menunggu',
+                        Pelanggaran::STATUS_DISETUJUI =>
+                            'Disetujui',
+                        Pelanggaran::STATUS_DITOLAK =>
+                            'Ditolak',
+                    ]),
 
                 SelectFilter::make('semester')
-                    ->label('Semester')
                     ->options([
                         'Ganjil' => 'Ganjil',
                         'Genap' => 'Genap',
                     ]),
-
-                SelectFilter::make('tahun_ajaran')
-                    ->label('Tahun Ajaran')
-                    ->options(fn (): array => \App\Models\Pelanggaran::query()
-                        ->whereNotNull('tahun_ajaran')
-                        ->distinct()
-                        ->orderBy('tahun_ajaran')
-                        ->pluck('tahun_ajaran', 'tahun_ajaran')
-                        ->toArray()),
             ])
             ->recordActions([
+                /*
+                 * Tombol persetujuan khusus Guru BK.
+                 */
+                Action::make('setujui')
+                    ->label('Setujui')
+                    ->icon(
+                        'heroicon-o-check-circle'
+                    )
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading(
+                        'Setujui Laporan Pelanggaran'
+                    )
+                    ->modalDescription(
+                        'Laporan yang disetujui akan menjadi data resmi dan digunakan dalam proses klasifikasi.'
+                    )
+                    ->modalSubmitActionLabel(
+                        'Ya, Setujui'
+                    )
+                    ->visible(
+                        fn (
+                            Pelanggaran $record
+                        ): bool =>
+                            (
+                                auth()
+                                    ->user()
+                                    ?->isGuruBk()
+                                ?? false
+                            ) &&
+                            $record->isMenunggu()
+                    )
+                    ->action(
+                        function (
+                            Pelanggaran $record
+                        ): void {
+                            $updated =
+                                Pelanggaran::query()
+                                    ->whereKey(
+                                        $record
+                                            ->getKey()
+                                    )
+                                    ->where(
+                                        'status_pengajuan',
+                                        Pelanggaran::STATUS_MENUNGGU
+                                    )
+                                    ->update([
+                                        'status_pengajuan' =>
+                                            Pelanggaran::STATUS_DISETUJUI,
+                                        'diproses_oleh' =>
+                                            auth()->id(),
+                                        'diproses_pada' =>
+                                            now(),
+                                        'catatan_verifikasi' =>
+                                            'Laporan disetujui oleh Guru BK',
+                                    ]);
+
+                            if ($updated === 0) {
+                                Notification::make()
+                                    ->title(
+                                        'Laporan sudah diproses'
+                                    )
+                                    ->warning()
+                                    ->send();
+
+                                return;
+                            }
+
+                            Notification::make()
+                                ->title(
+                                    'Laporan berhasil disetujui'
+                                )
+                                ->body(
+                                    'Laporan sekarang menjadi data pelanggaran resmi.'
+                                )
+                                ->success()
+                                ->send();
+                        }
+                    ),
+
+                /*
+                 * Tombol penolakan khusus Guru BK.
+                 */
+                Action::make('tolak')
+                    ->label('Tolak')
+                    ->icon(
+                        'heroicon-o-x-circle'
+                    )
+                    ->color('danger')
+                    ->modalHeading(
+                        'Tolak Laporan Pelanggaran'
+                    )
+                    ->modalDescription(
+                        'Masukkan alasan agar OSIS dapat memperbaiki laporan.'
+                    )
+                    ->modalSubmitActionLabel(
+                        'Tolak Laporan'
+                    )
+                    ->schema([
+                        Textarea::make(
+                            'catatan_verifikasi'
+                        )
+                            ->label(
+                                'Alasan Penolakan'
+                            )
+                            ->placeholder(
+                                'Contoh: Kronologi belum lengkap atau siswa yang dipilih tidak sesuai.'
+                            )
+                            ->required()
+                            ->rows(4)
+                            ->maxLength(1000),
+                    ])
+                    ->visible(
+                        fn (
+                            Pelanggaran $record
+                        ): bool =>
+                            (
+                                auth()
+                                    ->user()
+                                    ?->isGuruBk()
+                                ?? false
+                            ) &&
+                            $record->isMenunggu()
+                    )
+                    ->action(
+                        function (
+                            Pelanggaran $record,
+                            array $data
+                        ): void {
+                            $updated =
+                                Pelanggaran::query()
+                                    ->whereKey(
+                                        $record
+                                            ->getKey()
+                                    )
+                                    ->where(
+                                        'status_pengajuan',
+                                        Pelanggaran::STATUS_MENUNGGU
+                                    )
+                                    ->update([
+                                        'status_pengajuan' =>
+                                            Pelanggaran::STATUS_DITOLAK,
+                                        'diproses_oleh' =>
+                                            auth()->id(),
+                                        'diproses_pada' =>
+                                            now(),
+                                        'catatan_verifikasi' =>
+                                            $data[
+                                                'catatan_verifikasi'
+                                            ],
+                                    ]);
+
+                            if ($updated === 0) {
+                                Notification::make()
+                                    ->title(
+                                        'Laporan sudah diproses'
+                                    )
+                                    ->warning()
+                                    ->send();
+
+                                return;
+                            }
+
+                            Notification::make()
+                                ->title(
+                                    'Laporan ditolak'
+                                )
+                                ->body(
+                                    'OSIS dapat memperbaiki dan mengajukan laporan kembali.'
+                                )
+                                ->danger()
+                                ->send();
+                        }
+                    ),
+
                 EditAction::make()
-                    ->label('Edit'),
+                    ->label('Edit')
+                    ->visible(
+                        fn (
+                            Pelanggaran $record
+                        ): bool =>
+                            PelanggaranResource::canEdit(
+                                $record
+                            )
+                    ),
+
+                DeleteAction::make()
+                    ->label('Hapus')
+                    ->visible(
+                        fn (
+                            Pelanggaran $record
+                        ): bool =>
+                            PelanggaranResource::canDelete(
+                                $record
+                            )
+                    )
+                    ->requiresConfirmation(),
             ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->label('Hapus Terpilih')
-                        ->requiresConfirmation(),
-                ]),
-            ])
-            ->emptyStateHeading('Belum ada data pelanggaran')
-            ->emptyStateDescription('Silakan tambahkan data pelanggaran siswa terlebih dahulu.');
+            ->emptyStateHeading(
+                'Belum ada laporan pelanggaran'
+            )
+            ->emptyStateDescription(
+                'OSIS dapat mengajukan laporan pelanggaran siswa melalui tombol tambah.'
+            )
+            ->emptyStateIcon(
+                'heroicon-o-document-text'
+            );
     }
 }

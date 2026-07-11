@@ -15,18 +15,17 @@ class ListKelas extends ListRecords
         return 'Data Kelas';
     }
 
+    public function getSubheading(): ?string
+    {
+        return 'Kelola data kelas untuk Sistem Monitoring Bimbingan Konseling.';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make()
                 ->label('Tambah Kelas')
-                ->icon('heroicon-o-plus')
-                ->color('primary'),
+                ->icon('heroicon-o-plus'),
         ];
-    }
-
-    public function getSubheading(): ?string
-    {
-        return 'Kelola data kelas untuk Sistem Monitoring Bimbingan Konseling.';
     }
 }

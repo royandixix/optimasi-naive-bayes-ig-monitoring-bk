@@ -7,23 +7,48 @@ use Filament\Widgets\ChartWidget;
 
 class InformationGainRankingChart extends ChartWidget
 {
-    protected ?string $heading = 'Ranking Fitur Berdasarkan Information Gain';
+    protected ?string $heading =
+        'Ranking Fitur Berdasarkan Information Gain';
 
-    protected ?string $pollingInterval = '10s';
+    protected ?string $pollingInterval =
+        '10s';
 
-    protected int|string|array $columnSpan = 1;
+    protected int|string|array $columnSpan =
+        1;
 
     public static function canView(): bool
     {
-        return auth()->user()?->hasAnyRole([
-            'super_admin',
-            'kepala_sekolah',
-        ]) ?? false;
+        return auth()
+            ->user()
+            ?->hasAnyRole([
+                'super_admin',
+                'kepala_sekolah',
+            ]) ?? false;
     }
 
     protected function getData(): array
     {
-        $results = InformationGainResult::query()
+        $latest =
+            InformationGainResult::query()
+                ->latest('updated_at')
+                ->first();
+
+        $query =
+            InformationGainResult::query();
+
+        if ($latest?->tahun_ajaran) {
+            $query
+                ->where(
+                    'tahun_ajaran',
+                    $latest->tahun_ajaran
+                )
+                ->where(
+                    'semester',
+                    $latest->semester
+                );
+        }
+
+        $results = $query
             ->orderBy('ranking')
             ->limit(10)
             ->get();
@@ -31,13 +56,27 @@ class InformationGainRankingChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Nilai Gain',
-                    'data' => $results->pluck('gain')->map(fn ($value): float => (float) $value)->toArray(),
+                    'label' =>
+                        'Nilai Gain',
+
+                    'data' =>
+                        $results
+                            ->pluck('gain')
+                            ->map(
+                                fn ($value): float =>
+                                    (float) $value
+                            )
+                            ->toArray(),
+
                     'borderWidth' => 2,
                     'borderRadius' => 8,
                 ],
             ],
-            'labels' => $results->pluck('fitur')->toArray(),
+
+            'labels' =>
+                $results
+                    ->pluck('fitur')
+                    ->toArray(),
         ];
     }
 
@@ -45,16 +84,22 @@ class InformationGainRankingChart extends ChartWidget
     {
         return [
             'indexAxis' => 'y',
+
             'responsive' => true,
-            'maintainAspectRatio' => false,
+
+            'maintainAspectRatio' =>
+                false,
+
             'plugins' => [
                 'legend' => [
                     'position' => 'bottom',
                 ],
+
                 'tooltip' => [
                     'enabled' => true,
                 ],
             ],
+
             'scales' => [
                 'x' => [
                     'beginAtZero' => true,

@@ -9,27 +9,37 @@ use Filament\Widgets\TableWidget;
 
 class LatestKlasifikasiTable extends TableWidget
 {
-    protected static ?string $heading = 'Hasil Klasifikasi Siswa Terbaru';
+    protected static ?string $heading =
+        'Hasil Klasifikasi Siswa Terbaru';
 
-    protected static ?string $pollingInterval = '10s';
+    protected static ?string $pollingInterval =
+        '10s';
 
-    protected int|string|array $columnSpan = 'full';
+    protected int|string|array $columnSpan =
+        'full';
 
     public static function canView(): bool
     {
-        return auth()->user()?->hasAnyRole([
-            'super_admin',
-            'kepala_sekolah',
-        ]) ?? false;
+        return auth()
+            ->user()
+            ?->hasAnyRole([
+                'super_admin',
+                'kepala_sekolah',
+            ]) ?? false;
     }
 
-    public function table(Table $table): Table
-    {
+    public function table(
+        Table $table
+    ): Table {
         return $table
             ->query(
                 Klasifikasi::query()
-                    ->with(['siswa.kelas'])
-                    ->latest()
+                    ->with([
+                        'siswa.kelas',
+                    ])
+                    ->latest(
+                        'updated_at'
+                    )
             )
             ->columns([
                 TextColumn::make('siswa.nis')
@@ -46,7 +56,9 @@ class LatestKlasifikasiTable extends TableWidget
                     ->weight('bold')
                     ->placeholder('-'),
 
-                TextColumn::make('siswa.kelas.nama_kelas')
+                TextColumn::make(
+                    'siswa.kelas.nama_kelas'
+                )
                     ->label('Kelas')
                     ->searchable()
                     ->sortable()
@@ -54,36 +66,78 @@ class LatestKlasifikasiTable extends TableWidget
                     ->color('gray')
                     ->placeholder('-'),
 
-                TextColumn::make('jumlah_pelanggaran')
+                TextColumn::make(
+                    'tahun_ajaran'
+                )
+                    ->label('Tahun Ajaran')
+                    ->placeholder('-'),
+
+                TextColumn::make('semester')
+                    ->label('Semester')
+                    ->badge()
+                    ->placeholder('-'),
+
+                TextColumn::make(
+                    'jumlah_pelanggaran'
+                )
                     ->label('Pelanggaran')
                     ->sortable()
                     ->alignCenter(),
 
-                TextColumn::make('total_poin')
+                TextColumn::make(
+                    'total_poin'
+                )
                     ->label('Total Poin')
                     ->sortable()
                     ->alignCenter(),
 
-                TextColumn::make('hasil_ig_naive_bayes')
+                TextColumn::make(
+                    'hasil_ig_naive_bayes'
+                )
                     ->label('Hasil NB + IG')
                     ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'Baik' => 'success',
-                        'Perlu Pembinaan' => 'warning',
-                        'Bermasalah' => 'danger',
-                        default => 'gray',
-                    })
+                    ->color(
+                        fn (
+                            ?string $state
+                        ): string => match ($state) {
+                            'Baik' =>
+                                'success',
+
+                            'Perlu Pembinaan' =>
+                                'warning',
+
+                            'Bermasalah' =>
+                                'danger',
+
+                            default =>
+                                'gray',
+                        }
+                    )
                     ->placeholder('-'),
 
-                TextColumn::make('probabilitas_ig_naive_bayes')
+                TextColumn::make(
+                    'probabilitas_ig_naive_bayes'
+                )
                     ->label('Probabilitas')
-                    ->formatStateUsing(fn ($state): string => $state !== null ? number_format((float) $state * 100, 2) . '%' : '-')
+                    ->formatStateUsing(
+                        fn ($state): string =>
+                            $state !== null
+                            ? number_format(
+                                (float) $state * 100,
+                                2
+                            ).'%'
+                            : '-'
+                    )
                     ->sortable()
                     ->alignCenter(),
 
-                TextColumn::make('updated_at')
+                TextColumn::make(
+                    'updated_at'
+                )
                     ->label('Diperbarui')
-                    ->dateTime('d M Y H:i')
+                    ->dateTime(
+                        'd M Y H:i'
+                    )
                     ->sortable(),
             ])
             ->striped()

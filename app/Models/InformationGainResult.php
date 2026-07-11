@@ -10,6 +10,8 @@ class InformationGainResult extends Model
     use HasFactory;
 
     protected $fillable = [
+        'tahun_ajaran',
+        'semester',
         'fitur',
         'gain',
         'entropy_before',
@@ -18,6 +20,7 @@ class InformationGainResult extends Model
         'metode',
         'jumlah_data',
         'ranking',
+        'random_seed',
         'detail',
     ];
 
@@ -30,6 +33,7 @@ class InformationGainResult extends Model
             'selected' => 'boolean',
             'jumlah_data' => 'integer',
             'ranking' => 'integer',
+            'random_seed' => 'integer',
             'detail' => 'array',
         ];
     }

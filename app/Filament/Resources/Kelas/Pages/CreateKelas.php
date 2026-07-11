@@ -25,13 +25,13 @@ class CreateKelas extends CreateRecord
     protected function getCreatedNotification(): ?Notification
     {
         return Notification::make()
+            ->success()
             ->title('Berhasil')
-            ->body('Data kelas berhasil ditambahkan.')
-            ->success();
+            ->body('Data kelas berhasil ditambahkan.');
     }
 
     protected function getRedirectUrl(): string
     {
-        return static::getResource()::getUrl('index');
+        return $this->getResource()::getUrl('index');
     }
 }

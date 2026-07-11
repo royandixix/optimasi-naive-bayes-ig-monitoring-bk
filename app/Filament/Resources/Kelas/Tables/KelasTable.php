@@ -21,7 +21,8 @@ class KelasTable
                     ->badge()
                     ->color('primary')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->copyable(),
 
                 TextColumn::make('nama_kelas')
                     ->label('Nama Kelas')
@@ -40,30 +41,51 @@ class KelasTable
                     ->label('Tahun Ajaran')
                     ->badge()
                     ->color('success')
-                    ->sortable(),
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('-'),
 
                 TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->since()
+                    ->tooltip(
+                        fn ($record): ?string =>
+                            $record->created_at?->format('d M Y H:i')
+                    )
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('updated_at')
                     ->label('Diubah')
                     ->since()
+                    ->tooltip(
+                        fn ($record): ?string =>
+                            $record->updated_at?->format('d M Y H:i')
+                    )
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-            ])
             ->recordActions([
                 EditAction::make()
+                    ->label('Edit')
                     ->icon('heroicon-o-pencil-square'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->label('Hapus Terpilih')
+                        ->requiresConfirmation()
+                        ->modalHeading('Hapus Data Kelas')
+                        ->modalDescription(
+                            'Data kelas yang masih digunakan oleh siswa tidak dapat dihapus.'
+                        )
+                        ->modalSubmitActionLabel('Ya, Hapus'),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading('Belum ada data kelas')
+            ->emptyStateDescription(
+                'Silakan tambahkan kelas terlebih dahulu sebelum menginput data siswa.'
+            )
+            ->emptyStateIcon('heroicon-o-academic-cap');
     }
 }

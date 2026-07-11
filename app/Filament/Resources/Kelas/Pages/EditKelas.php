@@ -22,21 +22,23 @@ class EditKelas extends EditRecord
             DeleteAction::make()
                 ->label('Hapus')
                 ->icon('heroicon-o-trash')
-                ->color('danger')
-                ->requiresConfirmation(),
+                ->modalHeading('Hapus Data Kelas')
+                ->modalDescription('Apakah Anda yakin ingin menghapus data kelas ini? Tindakan ini tidak dapat dibatalkan.')
+                ->modalSubmitActionLabel('Ya, Hapus')
+                ->modalCancelActionLabel('Batal'),
         ];
     }
 
     protected function getSavedNotification(): ?Notification
     {
         return Notification::make()
+            ->success()
             ->title('Berhasil')
-            ->body('Data kelas berhasil diperbarui.')
-            ->success();
+            ->body('Data kelas berhasil diperbarui.');
     }
 
     protected function getRedirectUrl(): string
     {
-        return static::getResource()::getUrl('index');
+        return $this->getResource()::getUrl('index');
     }
 }
